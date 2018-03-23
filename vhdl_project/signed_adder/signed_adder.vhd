@@ -49,3 +49,20 @@ carry(SIGNAL_LENGTH-1 downto 1) <= (input_A(SIGNAL_LENGTH-2 downto 0) and input_
 
 end combinational_ripple_carry;
 
+
+
+architecture combinational_carry_lookahead of signed_adder is
+
+
+signal P: STD_LOGIC_VECTOR (SIGNAL_LENGTH-1 downto 0);
+signal G: STD_LOGIC_VECTOR (SIGNAL_LENGTH-1 downto 0);
+signal Cin: STD_LOGIC_VECTOR (SIGNAL_LENGTH-1 downto 0);
+begin
+
+P <= input_A xor input_B;
+output <= P xor Cin;
+G <= input_A and input_B;
+
+Cin(0) <= '0';
+Cin(SIGNAL_LENGTH-1 downto 1) <= G(SIGNAL_LENGTH-2 downto 0) or (P(SIGNAL_LENGTH-2 downto 0) and Cin(SIGNAL_LENGTH-2 downto 0));
+end combinational_carry_lookahead;

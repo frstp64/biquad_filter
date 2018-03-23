@@ -31,9 +31,12 @@ USE ieee.std_logic_1164.ALL;
 -- Uncomment the following library declaration if using
 -- arithmetic functions with Signed or Unsigned values
 USE ieee.numeric_std.ALL;
- 
+USE work.ALL;
 ENTITY signed_adder_tb IS
 END signed_adder_tb;
+ 
+ 
+
  
 ARCHITECTURE behavior OF signed_adder_tb IS 
  
@@ -62,15 +65,21 @@ ARCHITECTURE behavior OF signed_adder_tb IS
    signal en : std_logic := '0';
 
  	--Outputs
-   signal output_test : std_logic_vector(SIGNAL_LENGTH_test-1 downto 0);
+   signal output1_test : std_logic_vector(SIGNAL_LENGTH_test-1 downto 0);
+   signal output2_test : std_logic_vector(SIGNAL_LENGTH_test-1 downto 0);
 
    -- Clock period definitions
    constant clk_period : time := 10 ns;
  
+ 
+   for uut1 : signed_adder use entity
+            work.signed_adder(combinational_ripple_carry);
+   for uut2 : signed_adder use entity
+            work.signed_adder(combinational_carry_lookahead);
 BEGIN
  
 	-- Instantiate the Unit Under Test (UUT)
-   uut: signed_adder
+   uut1: signed_adder
 	generic map ( SIGNAL_LENGTH => SIGNAL_LENGTH_test)
 	PORT MAP (
           input_A => input_A_test,
@@ -78,7 +87,18 @@ BEGIN
           clk => clk,
           reset => reset,
           en => en,
-          output=> output_test
+          output=> output1_test
+        );
+		  
+	uut2: signed_adder
+	generic map ( SIGNAL_LENGTH => SIGNAL_LENGTH_test)
+	PORT MAP (
+          input_A => input_A_test,
+          input_B => input_B_test,
+          clk => clk,
+          reset => reset,
+          en => en,
+          output=> output2_test
         );
 
    -- Clock process definitions
