@@ -99,3 +99,4 @@ fuse.xmsgs
 *.cmd
 *.wdb
 *.exe
+*.ini
