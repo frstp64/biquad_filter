@@ -30,7 +30,7 @@ use IEEE.STD_LOGIC_1164.ALL;
 --use UNISIM.VComponents.all;
 
 entity biquad_filter is
-    generic ( SIGNAL_LENGTH: positive := 16);
+    generic ( SIGNAL_LENGTH: positive := 8);
     Port ( clk : in  STD_LOGIC;
            en : in  STD_LOGIC;
            reset : in  STD_LOGIC;
@@ -71,6 +71,51 @@ PORT(
 	  );
 END COMPONENT;
 
+ COMPONENT signed_multiplier
+ generic ( SIGNAL_LENGTH: positive);
+ PORT(
+		input_A : IN  std_logic_vector(SIGNAL_LENGTH-1 downto 0);
+		input_B : IN  std_logic_vector(SIGNAL_LENGTH-1 downto 0);
+		clk : IN  std_logic;
+		reset : IN  std_logic;
+		en : IN  std_logic;
+		output : OUT  std_logic_vector(SIGNAL_LENGTH-1 downto 0)
+	  );
+END COMPONENT;
+
+ COMPONENT signed_divider
+ generic ( SIGNAL_LENGTH: positive);
+ PORT(
+		input_A : IN  std_logic_vector(SIGNAL_LENGTH-1 downto 0);
+		input_B : IN  std_logic_vector(SIGNAL_LENGTH-1 downto 0);
+		clk : IN  std_logic;
+		reset : IN  std_logic;
+		en : IN  std_logic;
+		output : OUT  std_logic_vector(SIGNAL_LENGTH-1 downto 0)
+	  );
+END COMPONENT;
+
+ COMPONENT signed_adder
+ generic ( SIGNAL_LENGTH: positive);
+ PORT(
+		input_A : IN  std_logic_vector(SIGNAL_LENGTH-1 downto 0);
+		input_B : IN  std_logic_vector(SIGNAL_LENGTH-1 downto 0);
+		clk : IN  std_logic;
+		reset : IN  std_logic;
+		en : IN  std_logic;
+		output : OUT  std_logic_vector(SIGNAL_LENGTH-1 downto 0)
+	  );
+ END COMPONENT;
+ 
+ COMPONENT signed_inverter
+ generic ( SIGNAL_LENGTH: positive);
+ PORT(
+		input_value : IN  std_logic_vector(SIGNAL_LENGTH-1 downto 0);
+		output_value : OUT  std_logic_vector(SIGNAL_LENGTH-1 downto 0)
+	  );
+ END COMPONENT;
+
+-- mainly expander outputs, except for output_expanded.
 signal A1_mul_expanded : STD_LOGIC_VECTOR(INTERNAL_VARIABLE_LENGTH-1 downto 0);
 signal A1_div_expanded : STD_LOGIC_VECTOR(INTERNAL_VARIABLE_LENGTH-1 downto 0);
 signal A2_mul_expanded : STD_LOGIC_VECTOR(INTERNAL_VARIABLE_LENGTH-1 downto 0);
@@ -84,6 +129,28 @@ signal B2_div_expanded : STD_LOGIC_VECTOR(INTERNAL_VARIABLE_LENGTH-1 downto 0);
 signal  input_expanded : STD_LOGIC_VECTOR(INTERNAL_VARIABLE_LENGTH-1 downto 0);
 signal output_expanded : STD_LOGIC_VECTOR(INTERNAL_VARIABLE_LENGTH-1 downto 0);
 
+-- registers outputs
+signal input_previous_1 : STD_LOGIC_VECTOR(INTERNAL_VARIABLE_LENGTH-1 downto 0);
+signal input_previous_2 : STD_LOGIC_VECTOR(INTERNAL_VARIABLE_LENGTH-1 downto 0);
+signal output_previous_1 : STD_LOGIC_VECTOR(INTERNAL_VARIABLE_LENGTH-1 downto 0);
+signal output_previous_2 : STD_LOGIC_VECTOR(INTERNAL_VARIABLE_LENGTH-1 downto 0);
+
+-- computation_results
+signal input_times_b0_mul : STD_LOGIC_VECTOR(INTERNAL_VARIABLE_LENGTH-1 downto 0);
+signal input_times_b0 : STD_LOGIC_VECTOR(INTERNAL_VARIABLE_LENGTH-1 downto 0);
+signal input_p1_times_b1_mul : STD_LOGIC_VECTOR(INTERNAL_VARIABLE_LENGTH-1 downto 0);
+signal input_p1_times_b1 : STD_LOGIC_VECTOR(INTERNAL_VARIABLE_LENGTH-1 downto 0);
+signal input_p2_times_b2_mul : STD_LOGIC_VECTOR(INTERNAL_VARIABLE_LENGTH-1 downto 0);
+signal input_p2_times_b2 : STD_LOGIC_VECTOR(INTERNAL_VARIABLE_LENGTH-1 downto 0);
+signal output_p1_times_a1_mul : STD_LOGIC_VECTOR(INTERNAL_VARIABLE_LENGTH-1 downto 0);
+signal output_p1_times_a1 : STD_LOGIC_VECTOR(INTERNAL_VARIABLE_LENGTH-1 downto 0);
+signal output_p2_times_a2_mul : STD_LOGIC_VECTOR(INTERNAL_VARIABLE_LENGTH-1 downto 0);
+signal output_p2_times_a2 : STD_LOGIC_VECTOR(INTERNAL_VARIABLE_LENGTH-1 downto 0);
+
+signal results_b0_b1 : STD_LOGIC_VECTOR(INTERNAL_VARIABLE_LENGTH-1 downto 0);
+signal results_b0_b1_b2 : STD_LOGIC_VECTOR(INTERNAL_VARIABLE_LENGTH-1 downto 0);
+signal results_a1_a2 : STD_LOGIC_VECTOR(INTERNAL_VARIABLE_LENGTH-1 downto 0);
+signal results_a1_a2_inv : STD_LOGIC_VECTOR(INTERNAL_VARIABLE_LENGTH-1 downto 0);
 begin
 
 -- resize all the vectors here
@@ -113,8 +180,8 @@ A2_div_expander: signed_expander
 generic map (IN_LENGTH => SIGNAL_LENGTH,
 				 OUT_LENGTH => INTERNAL_VARIABLE_LENGTH)
 PORT MAP (
-		 in_value => parameter_A1_div,
-		 out_value => A1_div_expanded);
+		 in_value => parameter_A2_div,
+		 out_value => A2_div_expanded);
 
 B0_mul_expander: signed_expander 
 generic map (IN_LENGTH => SIGNAL_LENGTH,
@@ -158,6 +225,12 @@ PORT MAP (
 		 in_value => parameter_B2_div,
 		 out_value => B2_div_expanded);
 
+input_expander: signed_expander 
+generic map (IN_LENGTH => SIGNAL_LENGTH,
+				 OUT_LENGTH => INTERNAL_VARIABLE_LENGTH)
+PORT MAP (
+		 in_value => input_signal,
+		 out_value => input_expanded);
 
 output_contracter: signed_contracter
 generic map (IN_LENGTH => INTERNAL_VARIABLE_LENGTH,
@@ -168,7 +241,179 @@ PORT MAP (
 		 overflow => temporary_overflow);
 
 
+-- previous values registers TODO
 
+input_previous_1 <= input_expanded;
+input_previous_2 <= input_previous_1;
+
+output_previous_1 <= output_expanded;
+output_previous_2 <= output_previous_1;
+
+---- computation of multiplication/division of input/output values
+-- multiplicators
+input_times_b0_mul_component: signed_multiplier
+generic map( SIGNAL_LENGTH => INTERNAL_VARIABLE_LENGTH)
+PORT map(
+		input_A => input_expanded,
+		input_B => B0_mul_expanded,
+		clk => clk,
+		reset => reset,
+		en => en,
+		output => input_times_b0_mul
+	  );
+
+input_p1_times_b1_mul_component: signed_multiplier
+generic map( SIGNAL_LENGTH => INTERNAL_VARIABLE_LENGTH)
+PORT map(
+		input_A => input_previous_1,
+		input_B => B1_mul_expanded,
+		clk => clk,
+		reset => reset,
+		en => en,
+		output => input_p1_times_b1_mul
+	  );
+	  
+input_p2_times_b2_mul_component: signed_multiplier
+generic map( SIGNAL_LENGTH => INTERNAL_VARIABLE_LENGTH)
+PORT map(
+		input_A => input_previous_2,
+		input_B => B2_mul_expanded,
+		clk => clk,
+		reset => reset,
+		en => en,
+		output => input_p2_times_b2_mul
+	  );
+	  
+output_p1_times_a1_mul_component: signed_multiplier
+generic map( SIGNAL_LENGTH => INTERNAL_VARIABLE_LENGTH)
+PORT map(
+		input_A => output_previous_1,
+		input_B => A1_mul_expanded,
+		clk => clk,
+		reset => reset,
+		en => en,
+		output => output_p1_times_a1_mul
+	  );
+
+output_p2_times_a2_mul_component: signed_multiplier
+generic map( SIGNAL_LENGTH => INTERNAL_VARIABLE_LENGTH)
+PORT map(
+		input_A => output_previous_2,
+		input_B => A2_mul_expanded,
+		clk => clk,
+		reset => reset,
+		en => en,
+		output => output_p2_times_a2_mul
+	  );
+
+
+-- dividers
+
+input_times_b0_div_component: signed_divider
+generic map( SIGNAL_LENGTH => INTERNAL_VARIABLE_LENGTH)
+PORT map(
+		input_A => input_times_b0_mul,
+		input_B => B0_div_expanded,
+		clk => clk,
+		reset => reset,
+		en => en,
+		output => input_times_b0
+	  );
+
+input_p1_times_b1_div_component: signed_divider
+generic map( SIGNAL_LENGTH => INTERNAL_VARIABLE_LENGTH)
+PORT map(
+		input_A => input_p1_times_b1_mul,
+		input_B => B1_div_expanded,
+		clk => clk,
+		reset => reset,
+		en => en,
+		output => input_p1_times_b1
+	  );
+	  
+input_p2_times_b2_div_component: signed_divider
+generic map( SIGNAL_LENGTH => INTERNAL_VARIABLE_LENGTH)
+PORT map(
+		input_A => input_p2_times_b2_mul,
+		input_B => B2_div_expanded,
+		clk => clk,
+		reset => reset,
+		en => en,
+		output => input_p2_times_b2
+	  );
+	  
+output_p1_times_a1_div_component: signed_divider
+generic map( SIGNAL_LENGTH => INTERNAL_VARIABLE_LENGTH)
+PORT map(
+		input_A => output_p1_times_a1_mul,
+		input_B => A1_div_expanded,
+		clk => clk,
+		reset => reset,
+		en => en,
+		output => output_p1_times_a1
+	  );
+	  
+output_p2_times_a2_div_component: signed_divider
+generic map( SIGNAL_LENGTH => INTERNAL_VARIABLE_LENGTH)
+PORT map(
+		input_A => output_p2_times_a2_mul,
+		input_B => A2_div_expanded,
+		clk => clk,
+		reset => reset,
+		en => en,
+		output => output_p2_times_a2
+	  );
+
+results_b0_b1_adder: signed_adder
+generic map ( SIGNAL_LENGTH => INTERNAL_VARIABLE_LENGTH)
+PORT MAP (
+		 input_A => input_times_b0,
+		 input_B => input_p1_times_b1,
+		 clk => clk,
+		 reset => reset,
+		 en => en,
+		 output=> results_b0_b1
+	  );	  
+
+results_b0_b1_b2_adder: signed_adder
+generic map ( SIGNAL_LENGTH => INTERNAL_VARIABLE_LENGTH)
+PORT MAP (
+		 input_A => results_b0_b1,
+		 input_B => input_p2_times_b2,
+		 clk => clk,
+		 reset => reset,
+		 en => en,
+		 output=> results_b0_b1_b2
+	  );	  
+	  
+results_a1_a2_adder: signed_adder
+generic map ( SIGNAL_LENGTH => INTERNAL_VARIABLE_LENGTH)
+PORT MAP (
+		 input_A => output_p1_times_a1,
+		 input_B => output_p2_times_a2,
+		 clk => clk,
+		 reset => reset,
+		 en => en,
+		 output=> results_a1_a2
+	  );	  
+
+results_a1_a2_inv_inverter: signed_inverter
+generic map (SIGNAL_LENGTH => INTERNAL_VARIABLE_LENGTH)
+PORT MAP (
+		 input_value => results_a1_a2,
+		 output_value => results_a1_a2_inv
+	  );
+	  
+final_adder: signed_adder
+generic map ( SIGNAL_LENGTH => INTERNAL_VARIABLE_LENGTH)
+PORT MAP (
+		 input_A => results_b0_b1_b2,
+		 input_B => results_a1_a2_inv,
+		 clk => clk,
+		 reset => reset,
+		 en => en,
+		 output=> output_expanded
+	  );
 
 end flow_arch;
 
