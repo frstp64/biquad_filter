@@ -35,16 +35,18 @@ entity signed_inverter is
            output_value : out  STD_LOGIC_VECTOR (SIGNAL_LENGTH-1 downto 0));
 end signed_inverter;
 
-architecture combinatorial of signed_inverter is
+architecture combinational of signed_inverter is
 
 signal inversion: std_logic_vector (SIGNAL_LENGTH-1 downto 0);
 signal carry: std_logic_vector(SIGNAL_LENGTH-1 downto 0);
 begin
 
+inversion <= not input_value;
+
 -- implicit half adders to do a simple increment
 carry(0) <= '1';
-output <= inversion xor carry;
-carry(SIGNAL_LENGTH-1 downto 1) <= inversion and carry(SIGNAL_LENGTH-2 downto 0);
+output_value <= inversion xor carry;
+carry(SIGNAL_LENGTH-1 downto 1) <= inversion(SIGNAL_LENGTH-2 downto 0) and carry(SIGNAL_LENGTH-2 downto 0);
 
-end combinatorial;
+end combinational;
 
