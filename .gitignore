@@ -100,3 +100,4 @@ fuse.xmsgs
 *.wdb
 *.exe
 *.ini
+vhdl_project/isim
