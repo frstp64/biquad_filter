@@ -93,4 +93,9 @@ transcript*
 sc_dpiheader.h
 vsim.dbg
 
-
+# isim and other files
+*.log
+fuse.xmsgs
+*.cmd
+*.wdb
+*.exe
