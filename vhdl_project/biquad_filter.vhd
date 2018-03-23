@@ -30,7 +30,7 @@ use IEEE.STD_LOGIC_1164.ALL;
 --use UNISIM.VComponents.all;
 
 entity biquad_filter is
-    generic ( SIGNAL_LENGTH: positive);
+    generic ( SIGNAL_LENGTH: positive := 16);
     Port ( clk : in  STD_LOGIC;
            en : in  STD_LOGIC;
            reset : in  STD_LOGIC;
@@ -50,9 +50,9 @@ entity biquad_filter is
            temporary_overflow : out  STD_LOGIC);
 end biquad_filter;
 
-architecture main_arch of biquad_filter is
+architecture flow_arch of biquad_filter is
 
-constant INTERNAL_VARIABLE_LENGTH: integer := 2*SIGNAL_LENGTH     +2;
+constant INTERNAL_VARIABLE_LENGTH: integer := 2*SIGNAL_LENGTH     +2; -- to verify
 
 COMPONENT signed_expander
 generic ( IN_LENGTH: positive;
@@ -170,5 +170,5 @@ PORT MAP (
 
 
 
-end main_arch;
+end flow_arch;
 
