@@ -48,8 +48,8 @@ signal internal_value: std_logic_vector(SIGNAL_LENGTH-1 downto 0);
 begin
 
 -- generic values verification
-assert SIGNAL_LENGTH > 2
-report "signal must be greater than 2 bits"
+assert SIGNAL_LENGTH > 1
+report "signal must be greater than 1 bit"
 severity failure;
 
 
