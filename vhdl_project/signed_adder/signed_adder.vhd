@@ -20,7 +20,7 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 
--- This module assumes no overflow
+-- This module assumes no overflowASDasd
 
 entity signed_adder is
     generic ( SIGNAL_LENGTH: positive);
