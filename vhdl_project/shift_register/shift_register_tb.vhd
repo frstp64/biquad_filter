@@ -39,23 +39,26 @@ ARCHITECTURE behavior OF shift_register_tb IS
  
     -- Component Declaration for the Unit Under Test (UUT)
  
+    constant SIGNAL_LENGTH_test : integer := 8;
+	 
     COMPONENT shift_register
+	 GENERIC(SIGNAL_LENGTH: positive);
     PORT(
          serial_in : IN  std_logic;
-         parallel_in : IN  std_logic_vector(-1 to 0);
+         parallel_in : IN  std_logic_vector(SIGNAL_LENGTH_test-1 downto 0);
          load : IN  std_logic;
          clk : IN  std_logic;
          reset : IN  std_logic;
          enable : IN  std_logic;
          serial_out : OUT  std_logic;
-         parallel_out : OUT  std_logic_vector(-1 to 0)
+         parallel_out : OUT  std_logic_vector(SIGNAL_LENGTH_test-1 downto 0)
         );
     END COMPONENT;
     
 
    --Inputs
    signal serial_in : std_logic := '0';
-   signal parallel_in : std_logic_vector(-1 to 0) := (others => '0');
+   signal parallel_in : std_logic_vector(SIGNAL_LENGTH_test-1 downto 0) := (others => '0');
    signal load : std_logic := '0';
    signal clk : std_logic := '0';
    signal reset : std_logic := '0';
@@ -63,7 +66,7 @@ ARCHITECTURE behavior OF shift_register_tb IS
 
  	--Outputs
    signal serial_out : std_logic;
-   signal parallel_out : std_logic_vector(-1 to 0);
+   signal parallel_out : std_logic_vector(SIGNAL_LENGTH_test-1 downto 0);
 
    -- Clock period definitions
    constant clk_period : time := 10 ns;
@@ -71,7 +74,9 @@ ARCHITECTURE behavior OF shift_register_tb IS
 BEGIN
  
 	-- Instantiate the Unit Under Test (UUT)
-   uut: shift_register PORT MAP (
+   uut: shift_register 
+	GENERIC MAP ( SIGNAL_LENGTH => SIGNAL_LENGTH_test)
+	PORT MAP (
           serial_in => serial_in,
           parallel_in => parallel_in,
           load => load,
@@ -101,6 +106,16 @@ BEGIN
       wait for clk_period*10;
 
       -- insert stimulus here 
+		enable <= '1';
+		serial_in <= '1';
+		load <= '0';
+		parallel_in <= "01010101";
+		reset <= '1';
+		wait for clk_period;
+		reset <= '0';
+		load <= '1';
+		wait for clk_period*3;
+		load <= '0';
 
       wait;
    end process;
