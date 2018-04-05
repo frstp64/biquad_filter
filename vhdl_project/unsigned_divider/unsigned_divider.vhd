@@ -96,8 +96,10 @@ signal central_parallel_output: std_logic_vector(SIGNAL_LENGTH-1 downto 0);
 signal sub_ready_central_parallel_output: std_logic_vector(SIGNAL_LENGTH downto 0);
 signal sub_ready_divisor: std_logic_vector(SIGNAL_LENGTH downto 0);
 signal sub_ready_negative_divisor: std_logic_vector(SIGNAL_LENGTH downto 0);
+signal substraction_result_too_long: std_logic_vector(SIGNAL_LENGTH downto 0);
 
-signal readiness_propagation_vector: std_logic_vector(SIGNAL_LENGTH-1 downto 0);
+signal readiness_propagation_vector: std_logic_vector(SIGNAL_LENGTH+1 downto 0);
+
 
 begin
 
@@ -154,15 +156,18 @@ begin
           clk => clk,
           reset => reset,
           en => enable,
-          output=> substraction_result
+          output=> substraction_result_too_long
         );
+		  
+   -- remove the useless substraction result bit
+	substraction_result <= substraction_result_too_long(SIGNAL_LENGTH-1 downto 0);
 
 	
 	-- invert lt comparator output to get the greater than or equal comparator
 	is_greater_than_or_equal <= not is_less_than;
 	
 	-- shifts and fuses the substraction output
-	shifted_substraction_result <= substraction_result(SIGNAL_LENGTH-2 downto 1) & shifted_input_bit;
+	shifted_substraction_result <= substraction_result(SIGNAL_LENGTH-2 downto 0) & shifted_input_bit;
 	
 	-- sub-ready inputs for substractor (additional bit for sign)
 	sub_ready_central_parallel_output <= '0' & central_parallel_output;
@@ -181,14 +186,15 @@ begin
 	-- propagates the op_ready up to the output
 	process(clk, reset)
 	begin
-	    if (reset <= '1') then
+	    if (reset = '1') then
 		     readiness_propagation_vector <= (others => '0');
 		 elsif (rising_edge(clk)) then
-		     readiness_propagation_vector <= readiness_propagation_vector(SIGNAL_LENGTH-2 downto 0) & op_ready;
+		     readiness_propagation_vector <= readiness_propagation_vector(SIGNAL_LENGTH downto 0) & op_ready;
+			  --readiness_propagation_vector <= (others => '1');
 		 end if;
 	end process;
 
-output_ready <= readiness_propagation_vector(SIGNAL_LENGTH-1);
+output_ready <= readiness_propagation_vector(SIGNAL_LENGTH+1);
 
 end classic_shifter;
 
