@@ -43,7 +43,7 @@ end shift_register;
 
 architecture Behavioral of shift_register is
 
-signal internal_value: std_logic_vector(SIGNAL_LENGTH-1 downto 0)
+signal internal_value: std_logic_vector(SIGNAL_LENGTH-1 downto 0);
 
 begin
 
@@ -56,7 +56,7 @@ severity failure;
 process (clk, reset)
 begin
     if (reset = '1') then
-	     internal_value <= (others => '0')
+	     internal_value <= (others => '0');
     elsif (rising_edge(clk) and enable = '1') then
 	     if (load = '0') then
 		      internal_value <= internal_value (SIGNAL_LENGTH-2 downto 0) & serial_in;
