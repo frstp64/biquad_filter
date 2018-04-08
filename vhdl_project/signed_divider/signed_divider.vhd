@@ -34,10 +34,11 @@ entity signed_divider is
  PORT(
 		input_A : IN  std_logic_vector(SIGNAL_LENGTH-1 downto 0);
 		input_B : IN  std_logic_vector(SIGNAL_LENGTH-1 downto 0);
+		op_ready : IN std_logic;
 		clk : IN  std_logic;
 		reset : IN  std_logic;
 		en : IN  std_logic;
-		output : OUT  std_logic_vector(SIGNAL_LENGTH-1 downto 0)
+		output : OUT  std_logic_vector(SIGNAL_LENGTH-1 downto 0);
 	  );
 end signed_divider;
 
@@ -61,3 +62,75 @@ output <= signed_long_output(SIGNAL_LENGTH-1 downto 0);
 
 end cheat_divider;
 
+
+architecture n_plus_2_clock_cycles of signed_divider is
+
+entity unsigned_divider is
+    Generic (SIGNAL_LENGTH: positive);
+    Port ( dividend : in  STD_LOGIC_VECTOR (SIGNAL_LENGTH-1 downto 0);
+           divisor : in  STD_LOGIC_VECTOR (SIGNAL_LENGTH-1 downto 0);
+			  op_ready : in STD_LOGIC; -- MUST BE PULSED!
+           clk : in  STD_LOGIC;
+           reset : in  STD_LOGIC;
+           enable : in  STD_LOGIC;
+           quotient : out  STD_LOGIC_VECTOR (SIGNAL_LENGTH-1 downto 0);
+			  output_ready: out STD_LOGIC);
+end unsigned_divider;
+
+
+signal unsigned_A: STD_LOGIC_VECTOR(SIGNAL_LENGTH-1 downto 0);
+signal unsigned_B: STD_LOGIC_VECTOR(SIGNAL_LENGTH-1 downto 0);
+signal input_A_inverted: STD_LOGIC_VECTOR(SIGNAL_LENGTH-1 downto 0);
+signal input_B_inverted: STD_LOGIC_VECTOR(SIGNAL_LENGTH-1 downto 0);
+signal unsigned_output: STD_LOGIC_VECTOR(SIGNAL_LENGTH-1 downto 0);
+signal unsigned_output_inverted: STD_LOGIC_VECTOR(SIGNAL_LENGTH-1 downto 0);
+signal output_sign: std_logic;
+signal op_ready_signal: std_logic;
+signal output_ready_signal: std_logic;
+
+
+begin
+
+input_a_inverter: signed_inverter
+generic map (SIGNAL_LENGTH => SIGNAL_LENGTH)
+PORT MAP (
+		 input_value => input_A,
+		 output_value => input_A_inverted
+	  );
+
+input_b_inverter: signed_inverter
+generic map (SIGNAL_LENGTH => SIGNAL_LENGTH)
+PORT MAP (
+		 input_value => input_B,
+		 output_value => input_B_inverted
+	  );
+	  
+output_inverter: signed_inverter
+generic map (SIGNAL_LENGTH => SIGNAL_LENGTH)
+PORT MAP (
+		 input_value => unsigned_output,
+		 output_value => unsigned_output_inverted
+	  );
+	  
+UD: unsigned_divider
+Generic map(SIGNAL_LENGTH => SIGNAL_LENGTH)
+PORT map(
+		dividend => unsigned_A,
+		divisor => unsigned_B,
+		op_ready => op_ready_signal,
+		clk => clk,
+		reset => reset,
+		enable => en,
+		quotient => unsigned_output,
+		output_ready => output_ready_signal
+	  );
+	  
+unsigned_A <= input_A_inverted when input_A(SIGNAL_LENGTH-1) = '1' else input_A;
+unsigned_B <= input_B_inverted when input_B(SIGNAL_LENGTH-1) = '1' else input_B;
+
+output_sign <= input_A(SIGNAL_LENGTH-1) xor input_B(SIGNAL_LENGTH-1);
+
+op_ready_signal <= op_ready;
+
+output <= unsigned_output_inverted when output_sign = '1' else unsigned_output;
+end n_plus_2_clock_cycles;

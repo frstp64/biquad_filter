@@ -177,6 +177,22 @@ for output_p1_times_a1_mul_component : signed_multiplier use entity
 for output_p2_times_a2_mul_component : signed_multiplier use entity
 			work.signed_multiplier(wallace_tree);
 
+for input_times_b0_div_component : signed_divider use entity
+         work.signed_divider(n_plus_2_clock_cycles);
+
+for input_p1_times_b1_div_component : signed_divider use entity
+         work.signed_divider(n_plus_2_clock_cycles);
+
+for input_p2_times_b2_div_component : signed_divider use entity
+         work.signed_divider(n_plus_2_clock_cycles);
+
+for output_p1_times_a1_div_component : signed_divider use entity
+         work.signed_divider(n_plus_2_clock_cycles);
+
+for output_p2_times_a2_div_component : signed_divider use entity
+         work.signed_divider(n_plus_2_clock_cycles);
+
+
 begin
 
 -- resize all the vectors here
