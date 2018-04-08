@@ -520,6 +520,7 @@ PORT MAP (
 		 clk_out => op_ready_global
 	  );
 
+change_input <= op_ready_global;
 
 end flow_arch;
 
