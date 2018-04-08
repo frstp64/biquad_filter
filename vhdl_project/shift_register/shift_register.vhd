@@ -53,7 +53,7 @@ report "signal must be greater than 1 bit"
 severity failure;
 
 
-process (clk, reset)
+process (clk, reset, enable)
 begin
     if (reset = '1') then
 	     internal_value <= (others => '0');
