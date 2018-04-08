@@ -39,7 +39,7 @@ end clock_divider;
 
 architecture Behavioral of clock_divider is
 
-signal division_ring: std_logic_vector(division_factor-1 downto 0);
+signal division_ring: std_logic_vector(division_factor*2-1 downto 0);
 
 begin
 
@@ -48,14 +48,10 @@ begin
 		if reset='1' then
 			division_ring <= (1 => '1', others => '0');
 			clk_out <= '0';
-		elsif clk_in'event and clk_in='1' then
+		elsif rising_edge(clk_in) then
 			if en='1' then
-				division_ring <= division_ring(division_factor-2 downto 0) & division_ring(division_factor-1);
-				clk_out <= division_ring(division_factor-1);
-			end if;
-		elsif clk_in'event and clk_in='0' then
-			if en='1' then
-				clk_out <= '0';
+				division_ring <= division_ring(division_factor*2-2 downto 0) & division_ring(division_factor*2-1);
+				clk_out <= division_ring(division_factor*2-1);
 			end if;
 		end if;
 	end process;

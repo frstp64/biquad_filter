@@ -53,6 +53,7 @@ end biquad_filter;
 architecture flow_arch of biquad_filter is
 
 constant INTERNAL_VARIABLE_LENGTH: integer := 2*SIGNAL_LENGTH     +2; -- to verify
+constant CLOCK_DIVISION_VALUE: integer := INTERNAL_VARIABLE_LENGTH + 2;
 
 COMPONENT signed_expander
 generic ( IN_LENGTH: positive;
@@ -123,7 +124,14 @@ component nbitregister
            q,qb : out  STD_LOGIC_VECTOR (SIGNAL_LENGTH-1 downto 0)
 			  );
 end component;
- 
+
+component clock_divider
+    Generic ( division_factor: positive);
+    Port ( clk_in : in  STD_LOGIC;
+           en : in  STD_LOGIC;
+           reset : in  STD_LOGIC;
+           clk_out : out  STD_LOGIC);
+end component; 
 
 -- mainly expander outputs, except for output_expanded.
 signal A1_mul_expanded : STD_LOGIC_VECTOR(INTERNAL_VARIABLE_LENGTH-1 downto 0);
@@ -501,6 +509,17 @@ PORT MAP (
 		 en => en,
 		 output=> output_expanded
 	  );
+
+clock_chopper_and_division: clock_divider
+
+Generic map( division_factor => CLOCK_DIVISION_VALUE)
+PORT MAP (
+		 clk_in => clk,
+		 en => en,
+		 reset => reset,
+		 clk_out => op_ready_global
+	  );
+
 
 end flow_arch;
 
