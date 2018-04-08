@@ -38,7 +38,7 @@ entity signed_divider is
 		clk : IN  std_logic;
 		reset : IN  std_logic;
 		en : IN  std_logic;
-		output : OUT  std_logic_vector(SIGNAL_LENGTH-1 downto 0);
+		output : OUT  std_logic_vector(SIGNAL_LENGTH-1 downto 0)
 	  );
 end signed_divider;
 
@@ -65,7 +65,7 @@ end cheat_divider;
 
 architecture n_plus_2_clock_cycles of signed_divider is
 
-entity unsigned_divider is
+component unsigned_divider
     Generic (SIGNAL_LENGTH: positive);
     Port ( dividend : in  STD_LOGIC_VECTOR (SIGNAL_LENGTH-1 downto 0);
            divisor : in  STD_LOGIC_VECTOR (SIGNAL_LENGTH-1 downto 0);
@@ -75,8 +75,15 @@ entity unsigned_divider is
            enable : in  STD_LOGIC;
            quotient : out  STD_LOGIC_VECTOR (SIGNAL_LENGTH-1 downto 0);
 			  output_ready: out STD_LOGIC);
-end unsigned_divider;
+end component;
 
+ COMPONENT signed_inverter
+ generic ( SIGNAL_LENGTH: positive);
+ PORT(
+		input_value : IN  std_logic_vector(SIGNAL_LENGTH-1 downto 0);
+		output_value : OUT  std_logic_vector(SIGNAL_LENGTH-1 downto 0)
+	  );
+ END COMPONENT;
 
 signal unsigned_A: STD_LOGIC_VECTOR(SIGNAL_LENGTH-1 downto 0);
 signal unsigned_B: STD_LOGIC_VECTOR(SIGNAL_LENGTH-1 downto 0);

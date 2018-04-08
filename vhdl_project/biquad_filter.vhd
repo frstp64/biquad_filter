@@ -88,6 +88,7 @@ END COMPONENT;
  PORT(
 		input_A : IN  std_logic_vector(SIGNAL_LENGTH-1 downto 0);
 		input_B : IN  std_logic_vector(SIGNAL_LENGTH-1 downto 0);
+		op_ready : IN std_logic;
 		clk : IN  std_logic;
 		reset : IN  std_logic;
 		en : IN  std_logic;
@@ -161,6 +162,7 @@ signal results_b0_b1_b2 : STD_LOGIC_VECTOR(INTERNAL_VARIABLE_LENGTH-1 downto 0);
 signal results_a1_a2 : STD_LOGIC_VECTOR(INTERNAL_VARIABLE_LENGTH-1 downto 0);
 signal results_a1_a2_inv : STD_LOGIC_VECTOR(INTERNAL_VARIABLE_LENGTH-1 downto 0);
 
+signal op_ready_global: std_logic;
 
 for input_times_b0_mul_component : signed_multiplier use entity
 			work.signed_multiplier(wallace_tree);
@@ -394,6 +396,7 @@ generic map( SIGNAL_LENGTH => INTERNAL_VARIABLE_LENGTH)
 PORT map(
 		input_A => input_times_b0_mul,
 		input_B => B0_div_expanded,
+		op_ready => op_ready_global,
 		clk => clk,
 		reset => reset,
 		en => en,
@@ -405,6 +408,7 @@ generic map( SIGNAL_LENGTH => INTERNAL_VARIABLE_LENGTH)
 PORT map(
 		input_A => input_p1_times_b1_mul,
 		input_B => B1_div_expanded,
+		op_ready => op_ready_global,
 		clk => clk,
 		reset => reset,
 		en => en,
@@ -416,6 +420,7 @@ generic map( SIGNAL_LENGTH => INTERNAL_VARIABLE_LENGTH)
 PORT map(
 		input_A => input_p2_times_b2_mul,
 		input_B => B2_div_expanded,
+		op_ready => op_ready_global,
 		clk => clk,
 		reset => reset,
 		en => en,
@@ -427,6 +432,7 @@ generic map( SIGNAL_LENGTH => INTERNAL_VARIABLE_LENGTH)
 PORT map(
 		input_A => output_p1_times_a1_mul,
 		input_B => A1_div_expanded,
+		op_ready => op_ready_global,
 		clk => clk,
 		reset => reset,
 		en => en,
@@ -438,6 +444,7 @@ generic map( SIGNAL_LENGTH => INTERNAL_VARIABLE_LENGTH)
 PORT map(
 		input_A => output_p2_times_a2_mul,
 		input_B => A2_div_expanded,
+		op_ready => op_ready_global,
 		clk => clk,
 		reset => reset,
 		en => en,
