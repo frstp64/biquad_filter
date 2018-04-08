@@ -151,6 +151,22 @@ signal results_b0_b1 : STD_LOGIC_VECTOR(INTERNAL_VARIABLE_LENGTH-1 downto 0);
 signal results_b0_b1_b2 : STD_LOGIC_VECTOR(INTERNAL_VARIABLE_LENGTH-1 downto 0);
 signal results_a1_a2 : STD_LOGIC_VECTOR(INTERNAL_VARIABLE_LENGTH-1 downto 0);
 signal results_a1_a2_inv : STD_LOGIC_VECTOR(INTERNAL_VARIABLE_LENGTH-1 downto 0);
+
+
+for input_times_b0_mul_component : signed_multiplier use entity
+			work.signed_multiplier(wallace_tree);
+
+for input_p1_times_b1_mul_component : signed_multiplier use entity
+			work.signed_multiplier(wallace_tree);
+			
+for input_p2_times_b2_mul_component : signed_multiplier use entity
+			work.signed_multiplier(wallace_tree);
+
+for output_p1_times_a1_mul_component : signed_multiplier use entity
+			work.signed_multiplier(wallace_tree);
+
+for output_p2_times_a2_mul_component : signed_multiplier use entity
+			work.signed_multiplier(wallace_tree);
 begin
 
 -- resize all the vectors here
