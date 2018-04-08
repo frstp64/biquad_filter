@@ -46,7 +46,7 @@ entity biquad_filter is
            parameter_B2_div : in  STD_LOGIC_VECTOR (SIGNAL_LENGTH-1 downto 0);
            input_signal : in  STD_LOGIC_VECTOR (SIGNAL_LENGTH-1 downto 0);
            output_signal : out  STD_LOGIC_VECTOR (SIGNAL_LENGTH-1 downto 0);
-           change_input : out  STD_LOGIC_VECTOR (SIGNAL_LENGTH-1 downto 0);
+           change_input : out  STD_LOGIC;
            temporary_overflow : out  STD_LOGIC);
 end biquad_filter;
 
