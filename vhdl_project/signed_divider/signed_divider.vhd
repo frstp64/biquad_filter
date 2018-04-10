@@ -30,7 +30,7 @@ use IEEE.NUMERIC_STD.ALL;
 --use UNISIM.VComponents.all;
 
 entity signed_divider is
- generic ( SIGNAL_LENGTH: positive);
+ generic ( SIGNAL_LENGTH: positive:=32);
  PORT(
 		input_A : IN  std_logic_vector(SIGNAL_LENGTH-1 downto 0);
 		input_B : IN  std_logic_vector(SIGNAL_LENGTH-1 downto 0);

@@ -30,7 +30,7 @@ use IEEE.STD_LOGIC_1164.ALL;
 --use UNISIM.VComponents.all;
 
 entity biquad_filter is
-    generic ( SIGNAL_LENGTH: positive := 8);
+    generic ( SIGNAL_LENGTH: positive := 16);
     Port ( clk : in  STD_LOGIC;
            en : in  STD_LOGIC;
            reset : in  STD_LOGIC;
