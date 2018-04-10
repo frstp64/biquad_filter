@@ -63,12 +63,15 @@ ARCHITECTURE behavior OF signed_multiplier_tb IS
 
  	--Outputs
    signal output_test1 : std_logic_vector(SIGNAL_LENGTH_test-1 downto 0);
+   signal output_test2 : std_logic_vector(SIGNAL_LENGTH_test-1 downto 0);
 
    -- Clock period definitions
    constant clk_period : time := 10 ns;
 	
 	for uut1 : signed_multiplier use entity
             work.signed_multiplier(cheat_multiplier);
+	for uut2 : signed_multiplier use entity
+            work.signed_multiplier(wallace_tree);
  
 BEGIN
  
@@ -84,6 +87,17 @@ BEGIN
           output => output_test1
         );
 
+   uut2: signed_multiplier
+	generic map ( SIGNAL_LENGTH => SIGNAL_LENGTH_test)
+	PORT MAP (
+          input_A => input_A_test,
+          input_B => input_B_test,
+          clk => clk,
+          reset => reset,
+          en => en,
+          output => output_test2
+        );
+		  
    -- Clock process definitions
    clk_process :process
    begin

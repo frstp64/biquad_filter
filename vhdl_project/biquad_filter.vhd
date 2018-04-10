@@ -46,13 +46,14 @@ entity biquad_filter is
            parameter_B2_div : in  STD_LOGIC_VECTOR (SIGNAL_LENGTH-1 downto 0);
            input_signal : in  STD_LOGIC_VECTOR (SIGNAL_LENGTH-1 downto 0);
            output_signal : out  STD_LOGIC_VECTOR (SIGNAL_LENGTH-1 downto 0);
-           change_input : out  STD_LOGIC_VECTOR (SIGNAL_LENGTH-1 downto 0);
+           change_input : out  STD_LOGIC;
            temporary_overflow : out  STD_LOGIC);
 end biquad_filter;
 
 architecture flow_arch of biquad_filter is
 
 constant INTERNAL_VARIABLE_LENGTH: integer := 2*SIGNAL_LENGTH     +2; -- to verify
+constant CLOCK_DIVISION_VALUE: integer := INTERNAL_VARIABLE_LENGTH + 2;
 
 COMPONENT signed_expander
 generic ( IN_LENGTH: positive;
@@ -88,6 +89,7 @@ END COMPONENT;
  PORT(
 		input_A : IN  std_logic_vector(SIGNAL_LENGTH-1 downto 0);
 		input_B : IN  std_logic_vector(SIGNAL_LENGTH-1 downto 0);
+		op_ready : IN std_logic;
 		clk : IN  std_logic;
 		reset : IN  std_logic;
 		en : IN  std_logic;
@@ -114,6 +116,22 @@ END COMPONENT;
 		output_value : OUT  std_logic_vector(SIGNAL_LENGTH-1 downto 0)
 	  );
  END COMPONENT;
+ 
+component nbitregister
+	 generic(SIGNAL_LENGTH: integer);
+    Port ( pre_op, clk, rst : in  STD_LOGIC;
+           op_a : in  STD_LOGIC_VECTOR (SIGNAL_LENGTH-1 downto 0);
+           q,qb : out  STD_LOGIC_VECTOR (SIGNAL_LENGTH-1 downto 0)
+			  );
+end component;
+
+component clock_divider
+    Generic ( division_factor: positive);
+    Port ( clk_in : in  STD_LOGIC;
+           en : in  STD_LOGIC;
+           reset : in  STD_LOGIC;
+           clk_out : out  STD_LOGIC);
+end component; 
 
 -- mainly expander outputs, except for output_expanded.
 signal A1_mul_expanded : STD_LOGIC_VECTOR(INTERNAL_VARIABLE_LENGTH-1 downto 0);
@@ -151,6 +169,40 @@ signal results_b0_b1 : STD_LOGIC_VECTOR(INTERNAL_VARIABLE_LENGTH-1 downto 0);
 signal results_b0_b1_b2 : STD_LOGIC_VECTOR(INTERNAL_VARIABLE_LENGTH-1 downto 0);
 signal results_a1_a2 : STD_LOGIC_VECTOR(INTERNAL_VARIABLE_LENGTH-1 downto 0);
 signal results_a1_a2_inv : STD_LOGIC_VECTOR(INTERNAL_VARIABLE_LENGTH-1 downto 0);
+
+signal op_ready_global: std_logic;
+
+for input_times_b0_mul_component : signed_multiplier use entity
+			work.signed_multiplier(wallace_tree);
+
+for input_p1_times_b1_mul_component : signed_multiplier use entity
+			work.signed_multiplier(wallace_tree);
+			
+for input_p2_times_b2_mul_component : signed_multiplier use entity
+			work.signed_multiplier(wallace_tree);
+
+for output_p1_times_a1_mul_component : signed_multiplier use entity
+			work.signed_multiplier(wallace_tree);
+
+for output_p2_times_a2_mul_component : signed_multiplier use entity
+			work.signed_multiplier(wallace_tree);
+
+for input_times_b0_div_component : signed_divider use entity
+         work.signed_divider(n_plus_2_clock_cycles);
+
+for input_p1_times_b1_div_component : signed_divider use entity
+         work.signed_divider(n_plus_2_clock_cycles);
+
+for input_p2_times_b2_div_component : signed_divider use entity
+         work.signed_divider(n_plus_2_clock_cycles);
+
+for output_p1_times_a1_div_component : signed_divider use entity
+         work.signed_divider(n_plus_2_clock_cycles);
+
+for output_p2_times_a2_div_component : signed_divider use entity
+         work.signed_divider(n_plus_2_clock_cycles);
+
+
 begin
 
 -- resize all the vectors here
@@ -243,11 +295,49 @@ PORT MAP (
 
 -- previous values registers TODO
 
-input_previous_1 <= input_expanded;
-input_previous_2 <= input_previous_1;
+input_prev_1_register: nbitregister
+       GENERIC MAP(SIGNAL_LENGTH => INTERNAL_VARIABLE_LENGTH)
+		 PORT MAP (
+		 pre_op => en,
+		 clk => clk,
+		 rst => reset,
+		 op_a => input_expanded,
+		 q => input_previous_1,
+		 qb => open
+	  );
 
-output_previous_1 <= output_expanded;
-output_previous_2 <= output_previous_1;
+input_prev_2_register: nbitregister
+       GENERIC MAP(SIGNAL_LENGTH => INTERNAL_VARIABLE_LENGTH)
+		 PORT MAP (
+		 pre_op => en,
+		 clk => clk,
+		 rst => reset,
+		 op_a => input_previous_1,
+		 q => input_previous_2,
+		 qb => open
+	  );
+
+output_prev_1_register: nbitregister
+       GENERIC MAP(SIGNAL_LENGTH => INTERNAL_VARIABLE_LENGTH)
+       PORT MAP (
+		 pre_op => en,
+		 clk => clk,
+		 rst => reset,
+		 op_a => output_expanded,
+		 q => output_previous_1,
+		 qb => open
+	  );
+
+output_prev_2_register: nbitregister
+       GENERIC MAP(SIGNAL_LENGTH => INTERNAL_VARIABLE_LENGTH)
+		 PORT MAP (
+		 pre_op => en,
+		 clk => clk,
+		 rst => reset,
+		 op_a => output_previous_2,
+		 q => output_previous_2,
+		 qb => open
+	  );
 
 ---- computation of multiplication/division of input/output values
 -- multiplicators
@@ -314,6 +404,7 @@ generic map( SIGNAL_LENGTH => INTERNAL_VARIABLE_LENGTH)
 PORT map(
 		input_A => input_times_b0_mul,
 		input_B => B0_div_expanded,
+		op_ready => op_ready_global,
 		clk => clk,
 		reset => reset,
 		en => en,
@@ -325,6 +416,7 @@ generic map( SIGNAL_LENGTH => INTERNAL_VARIABLE_LENGTH)
 PORT map(
 		input_A => input_p1_times_b1_mul,
 		input_B => B1_div_expanded,
+		op_ready => op_ready_global,
 		clk => clk,
 		reset => reset,
 		en => en,
@@ -336,6 +428,7 @@ generic map( SIGNAL_LENGTH => INTERNAL_VARIABLE_LENGTH)
 PORT map(
 		input_A => input_p2_times_b2_mul,
 		input_B => B2_div_expanded,
+		op_ready => op_ready_global,
 		clk => clk,
 		reset => reset,
 		en => en,
@@ -347,6 +440,7 @@ generic map( SIGNAL_LENGTH => INTERNAL_VARIABLE_LENGTH)
 PORT map(
 		input_A => output_p1_times_a1_mul,
 		input_B => A1_div_expanded,
+		op_ready => op_ready_global,
 		clk => clk,
 		reset => reset,
 		en => en,
@@ -358,6 +452,7 @@ generic map( SIGNAL_LENGTH => INTERNAL_VARIABLE_LENGTH)
 PORT map(
 		input_A => output_p2_times_a2_mul,
 		input_B => A2_div_expanded,
+		op_ready => op_ready_global,
 		clk => clk,
 		reset => reset,
 		en => en,
@@ -414,6 +509,18 @@ PORT MAP (
 		 en => en,
 		 output=> output_expanded
 	  );
+
+clock_chopper_and_division: clock_divider
+
+Generic map( division_factor => CLOCK_DIVISION_VALUE)
+PORT MAP (
+		 clk_in => clk,
+		 en => en,
+		 reset => reset,
+		 clk_out => op_ready_global
+	  );
+
+change_input <= op_ready_global;
 
 end flow_arch;
 
