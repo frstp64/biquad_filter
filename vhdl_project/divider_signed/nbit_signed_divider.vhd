@@ -33,7 +33,7 @@ use IEEE.STD_LOGIC_ARITH.all;
 --use UNISIM.VComponents.all;
 
 entity division is
-    generic(SIGNAL_LENGTH: INTEGER := 32);
+    generic(SIGNAL_LENGTH: INTEGER := 8);
     port(reset: in STD_LOGIC;
         en: in STD_LOGIC;
 		  op_ready: in STD_LOGIC;

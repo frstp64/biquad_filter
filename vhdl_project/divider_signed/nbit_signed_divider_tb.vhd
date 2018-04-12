@@ -39,15 +39,18 @@ ARCHITECTURE behavior OF nbit_signed_divider_tb IS
  
     -- Component Declaration for the Unit Under Test (UUT)
  
+    CONSTANT SIGNAL_WIDTH : integer := 8;
+	 
     COMPONENT division
+	 GENERIC(SIGNAL_LENGTH: positive);
     PORT(
          reset : IN  std_logic;
          en : IN  std_logic;
          op_ready : IN  std_logic;
          clk : IN  std_logic;
-         input_A : IN  std_logic_vector(31 downto 0);
-         input_B : IN  std_logic_vector(31 downto 0);
-         output : OUT  std_logic_vector(31 downto 0)
+         input_A : IN  std_logic_vector(SIGNAL_WIDTH-1 downto 0);
+         input_B : IN  std_logic_vector(SIGNAL_WIDTH-1 downto 0);
+         output : OUT  std_logic_vector(SIGNAL_WIDTH-1 downto 0)
         );
     END COMPONENT;
    --Inputs
@@ -55,11 +58,11 @@ ARCHITECTURE behavior OF nbit_signed_divider_tb IS
    signal en : std_logic := '0';
    signal op_ready : std_logic := '0';
    signal clk : std_logic := '0';
-   signal input_A : std_logic_vector(31 downto 0) := (others => '0');
-   signal input_B : std_logic_vector(31 downto 0) := (others => '0');
+   signal input_A : std_logic_vector(SIGNAL_WIDTH-1 downto 0) := (others => '0');
+   signal input_B : std_logic_vector(SIGNAL_WIDTH-1 downto 0) := (others => '0');
 
  	--Outputs
-   signal output : std_logic_vector(31 downto 0);
+   signal output : std_logic_vector(SIGNAL_WIDTH-1 downto 0);
 
    -- Clock period definitions
    constant clk_period : time := 10 ns;
@@ -67,7 +70,9 @@ ARCHITECTURE behavior OF nbit_signed_divider_tb IS
 BEGIN
  
 	-- Instantiate the Unit Under Test (UUT)
-   uut: division PORT MAP (
+   uut: division
+	GENERIC MAP(SIGNAL_LENGTH => SIGNAL_WIDTH)
+	PORT MAP (
           reset => reset,
           en => en,
           op_ready => op_ready,
@@ -99,32 +104,32 @@ BEGIN
 		op_ready<='1';
 		en<='1';
 		reset<='0';
-		input_A<="00000000000000000000000000001110";
-		input_B<="00000000000000000000000000000011";
+		input_A<="00001110";
+		input_B<="00000011";
 		wait for clk_period*100;
 		
-		input_A<="11000000000000000000000000001110";
-		input_B<="00000000000000000000000000011011";
+		input_A<="00001110";
+		input_B<="00011011";
 		wait for clk_period*100;
 		
-		input_A<="00000000000000000000000000111110";
-		input_B<="00000000000000000000000000000011";
+		input_A<="00111110";
+		input_B<="00000011";
 		wait for clk_period*100;
 		
-		input_A<="10000000110000000000000000111110";
-		input_B<="11111111111111111111111110010011";
+		input_A<="10111110";
+		input_B<="10010011";
 		wait for clk_period*100;
 		
-		input_A<="00000000000000000000000000111111";
-		input_B<="00000000000000000000000000111111";
+		input_A<="00111111";
+		input_B<="00111111";
 		wait for clk_period*100;
 		
-		input_A<="11111111111111111111111111100001";
-		input_B<="00000000000000000000000000000011";
+		input_A<="11100001";
+		input_B<="00000011";
 		wait for clk_period*100;
 		
-		input_A<="00000000000000000000000000001111";
-		input_B<="00000000000000000000000001111111";
+		input_A<="00001111";
+		input_B<="01111111";
 		wait for clk_period*100;
 		
 		

@@ -30,7 +30,7 @@ use IEEE.STD_LOGIC_1164.ALL;
 --use UNISIM.VComponents.all;
 
 entity biquad_filter is
-    generic ( SIGNAL_LENGTH: positive := 16);
+    generic ( SIGNAL_LENGTH: positive := 8);
     Port ( clk : in  STD_LOGIC;
            en : in  STD_LOGIC;
            reset : in  STD_LOGIC;
@@ -84,7 +84,7 @@ END COMPONENT;
 	  );
 END COMPONENT;
 
- COMPONENT signed_divider
+ COMPONENT division
  generic ( SIGNAL_LENGTH: positive);
  PORT(
 		input_A : IN  std_logic_vector(SIGNAL_LENGTH-1 downto 0);
@@ -187,20 +187,20 @@ for output_p1_times_a1_mul_component : signed_multiplier use entity
 for output_p2_times_a2_mul_component : signed_multiplier use entity
 			work.signed_multiplier(wallace_tree);
 
-for input_times_b0_div_component : signed_divider use entity
-         work.signed_divider(n_plus_2_clock_cycles);
-
-for input_p1_times_b1_div_component : signed_divider use entity
-         work.signed_divider(n_plus_2_clock_cycles);
-
-for input_p2_times_b2_div_component : signed_divider use entity
-         work.signed_divider(n_plus_2_clock_cycles);
-
-for output_p1_times_a1_div_component : signed_divider use entity
-         work.signed_divider(n_plus_2_clock_cycles);
-
-for output_p2_times_a2_div_component : signed_divider use entity
-         work.signed_divider(n_plus_2_clock_cycles);
+--for input_times_b0_div_component : signed_divider use entity
+--         work.signed_divider(n_plus_2_clock_cycles);
+--
+--for input_p1_times_b1_div_component : signed_divider use entity
+--         work.signed_divider(n_plus_2_clock_cycles);
+--
+--for input_p2_times_b2_div_component : signed_divider use entity
+--         work.signed_divider(n_plus_2_clock_cycles);
+--
+--for output_p1_times_a1_div_component : signed_divider use entity
+--         work.signed_divider(n_plus_2_clock_cycles);
+--
+--for output_p2_times_a2_div_component : signed_divider use entity
+--         work.signed_divider(n_plus_2_clock_cycles);
 
 
 begin
@@ -399,7 +399,7 @@ PORT map(
 
 -- dividers
 
-input_times_b0_div_component: signed_divider
+input_times_b0_div_component: division
 generic map( SIGNAL_LENGTH => INTERNAL_VARIABLE_LENGTH)
 PORT map(
 		input_A => input_times_b0_mul,
@@ -411,7 +411,7 @@ PORT map(
 		output => input_times_b0
 	  );
 
-input_p1_times_b1_div_component: signed_divider
+input_p1_times_b1_div_component: division
 generic map( SIGNAL_LENGTH => INTERNAL_VARIABLE_LENGTH)
 PORT map(
 		input_A => input_p1_times_b1_mul,
@@ -423,7 +423,7 @@ PORT map(
 		output => input_p1_times_b1
 	  );
 	  
-input_p2_times_b2_div_component: signed_divider
+input_p2_times_b2_div_component: division
 generic map( SIGNAL_LENGTH => INTERNAL_VARIABLE_LENGTH)
 PORT map(
 		input_A => input_p2_times_b2_mul,
@@ -435,7 +435,7 @@ PORT map(
 		output => input_p2_times_b2
 	  );
 	  
-output_p1_times_a1_div_component: signed_divider
+output_p1_times_a1_div_component: division
 generic map( SIGNAL_LENGTH => INTERNAL_VARIABLE_LENGTH)
 PORT map(
 		input_A => output_p1_times_a1_mul,
@@ -447,7 +447,7 @@ PORT map(
 		output => output_p1_times_a1
 	  );
 	  
-output_p2_times_a2_div_component: signed_divider
+output_p2_times_a2_div_component: division
 generic map( SIGNAL_LENGTH => INTERNAL_VARIABLE_LENGTH)
 PORT map(
 		input_A => output_p2_times_a2_mul,
