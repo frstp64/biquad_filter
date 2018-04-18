@@ -66,7 +66,7 @@ ARCHITECTURE behavior OF nbit_signed_divider_tb IS
 
    -- Clock period definitions
    constant clk_period : time := 10 ns;
- 
+   constant cycle_number : integer := 10;
 BEGIN
  
 	-- Instantiate the Unit Under Test (UUT)
@@ -106,31 +106,54 @@ BEGIN
 		reset<='0';
 		input_A<="00001110";
 		input_B<="00000011";
-		wait for clk_period*100;
 		
+		wait for clk_period*1;
+
+		op_ready<='0';
+		wait for clk_period*cycle_number;
+		op_ready<='1';
 		input_A<="00001110";
 		input_B<="00011011";
-		wait for clk_period*100;
+		wait for clk_period*1;
+
+		op_ready<='0';
+		wait for clk_period*cycle_number;
 		
+		op_ready<='1';
 		input_A<="00111110";
 		input_B<="00000011";
-		wait for clk_period*100;
-		
+		wait for clk_period*1;
+
+		op_ready<='0';
+		wait for clk_period*cycle_number;
+		op_ready<='1';
 		input_A<="10111110";
 		input_B<="10010011";
-		wait for clk_period*100;
-		
+		wait for clk_period*1;
+
+		op_ready<='0';
+		wait for clk_period*cycle_number;
+		op_ready<='1';
 		input_A<="00111111";
 		input_B<="00111111";
-		wait for clk_period*100;
-		
+		wait for clk_period*1;
+
+		op_ready<='0';
+		wait for clk_period*cycle_number;
+		op_ready<='1';
 		input_A<="11100001";
 		input_B<="00000011";
-		wait for clk_period*100;
-		
+		wait for clk_period*1;
+
+		op_ready<='0';
+		wait for clk_period*cycle_number;
+		op_ready<='1';
 		input_A<="00001111";
 		input_B<="01111111";
-		wait for clk_period*100;
+		wait for clk_period*1;
+
+		op_ready<='0';
+		wait for clk_period*cycle_number;
 		
 		
       wait;

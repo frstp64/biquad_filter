@@ -298,7 +298,7 @@ PORT MAP (
 input_prev_1_register: nbitregister
        GENERIC MAP(SIGNAL_LENGTH => INTERNAL_VARIABLE_LENGTH)
 		 PORT MAP (
-		 pre_op => en,
+		 pre_op => op_ready_global,
 		 clk => clk,
 		 rst => reset,
 		 op_a => input_expanded,
@@ -309,7 +309,7 @@ input_prev_1_register: nbitregister
 input_prev_2_register: nbitregister
        GENERIC MAP(SIGNAL_LENGTH => INTERNAL_VARIABLE_LENGTH)
 		 PORT MAP (
-		 pre_op => en,
+		 pre_op => op_ready_global,
 		 clk => clk,
 		 rst => reset,
 		 op_a => input_previous_1,
@@ -320,21 +320,23 @@ input_prev_2_register: nbitregister
 output_prev_1_register: nbitregister
        GENERIC MAP(SIGNAL_LENGTH => INTERNAL_VARIABLE_LENGTH)
        PORT MAP (
-		 pre_op => en,
+		 pre_op => op_ready_global,
 		 clk => clk,
 		 rst => reset,
 		 op_a => output_expanded,
-		 q => output_previous_1,
+		 q => output_previous_2, -- fix
 		 qb => open
 	  );
+
+output_previous_1 <= output_expanded;
 
 output_prev_2_register: nbitregister
        GENERIC MAP(SIGNAL_LENGTH => INTERNAL_VARIABLE_LENGTH)
 		 PORT MAP (
-		 pre_op => en,
+		 pre_op => op_ready_global,
 		 clk => clk,
 		 rst => reset,
-		 op_a => output_previous_2,
+		 op_a => output_previous_1,
 		 q => output_previous_2,
 		 qb => open
 	  );
