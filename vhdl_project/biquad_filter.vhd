@@ -148,7 +148,8 @@ signal  input_expanded : STD_LOGIC_VECTOR(INTERNAL_VARIABLE_LENGTH-1 downto 0);
 signal output_expanded : STD_LOGIC_VECTOR(INTERNAL_VARIABLE_LENGTH-1 downto 0);
 
 -- registers outputs
-signal input_previous_1 : STD_LOGIC_VECTOR(INTERNAL_VARIABLE_LENGTH-1 downto 0);
+
+signal input_previous_1, input_previous_0 : STD_LOGIC_VECTOR(INTERNAL_VARIABLE_LENGTH-1 downto 0);
 signal input_previous_2 : STD_LOGIC_VECTOR(INTERNAL_VARIABLE_LENGTH-1 downto 0);
 signal output_previous_1 : STD_LOGIC_VECTOR(INTERNAL_VARIABLE_LENGTH-1 downto 0);
 signal output_previous_2 : STD_LOGIC_VECTOR(INTERNAL_VARIABLE_LENGTH-1 downto 0);
@@ -295,13 +296,24 @@ PORT MAP (
 
 -- previous values registers TODO
 
-input_prev_1_register: nbitregister
+input_prev_0_register: nbitregister
        GENERIC MAP(SIGNAL_LENGTH => INTERNAL_VARIABLE_LENGTH)
 		 PORT MAP (
 		 pre_op => op_ready_global,
 		 clk => clk,
 		 rst => reset,
 		 op_a => input_expanded,
+		 q => input_previous_0,
+		 qb => open
+	  );
+
+input_prev_1_register: nbitregister
+       GENERIC MAP(SIGNAL_LENGTH => INTERNAL_VARIABLE_LENGTH)
+		 PORT MAP (
+		 pre_op => op_ready_global,
+		 clk => clk,
+		 rst => reset,
+		 op_a => input_previous_0,
 		 q => input_previous_1,
 		 qb => open
 	  );
@@ -317,8 +329,6 @@ input_prev_2_register: nbitregister
 		 qb => open
 	  );
 
-output_previous_1 <= output_expanded;
-
 output_prev_1_register: nbitregister
        GENERIC MAP(SIGNAL_LENGTH => INTERNAL_VARIABLE_LENGTH)
        PORT MAP (
@@ -326,20 +336,20 @@ output_prev_1_register: nbitregister
 		 clk => clk,
 		 rst => reset,
 		 op_a => output_expanded,
-		 q => output_previous_2, --output_previous_1,
+		 q => output_previous_1,
 		 qb => open
 	  );
 
---output_prev_2_register: nbitregister
---       GENERIC MAP(SIGNAL_LENGTH => INTERNAL_VARIABLE_LENGTH)
---		 PORT MAP (
---		 pre_op => op_ready_global,
---		 clk => clk,
---		 rst => reset,
---		 op_a => output_previous_2,
---		 q => output_previous_2,
---		 qb => open
---	  );
+output_prev_2_register: nbitregister
+       GENERIC MAP(SIGNAL_LENGTH => INTERNAL_VARIABLE_LENGTH)
+		 PORT MAP (
+		 pre_op => op_ready_global,
+		 clk => clk,
+		 rst => reset,
+		 op_a => output_previous_1,
+		 q => output_previous_2,
+		 qb => open
+	  );
 
 ---- computation of multiplication/division of input/output values
 -- multiplicators

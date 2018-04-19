@@ -63,14 +63,18 @@ calculating:process(reset, en, clk)
         if reset = '1' then
             quotient <= (others => '0');
             cnt <= 0;
+				nbuf <= (others => '0');
+            dbuf <= (others => '0');
+            out_ready <= '0';
         elsif rising_edge(clk) then
-            if en = '1' and op_ready='1' then
+            --if en = '1' and op_ready='1' then
+            if en = '1' and op_ready='0' then
                 case cnt is
                 when 0 =>
                     nbufH <= (others => '0');
                     nbufL <= num;
                     dbuf <= den;
-                    quotient <= nbufL;
+                    --quotient <= nbufL;
                     cnt <= cnt + 1;
                 when others =>
                     if nbuf((2 * SIGNAL_LENGTH - 2) downto (SIGNAL_LENGTH - 1)) >= dbuf then
@@ -79,12 +83,16 @@ calculating:process(reset, en, clk)
                     else
                         nbuf <= nbuf((2 * SIGNAL_LENGTH - 2) downto 0) & '0';
                     end if;
-                    if cnt /= SIGNAL_LENGTH then
+                    if cnt /= SIGNAL_LENGTH+1 then
                         cnt <= cnt + 1;
                     else
                         cnt <= 0;
+								quotient <= nbufL;
                     end if;
                 end case;
+				elsif en = '1' and op_ready='1' then
+				    cnt <= 0;
+                nbuf <= (others => '0');
             end if;
         end if;
 end process calculating;
