@@ -55,6 +55,10 @@ architecture arch_division of division is
 	 signal out_ready: std_logic;
     alias nbufH is nbuf((2 * SIGNAL_LENGTH - 1) downto SIGNAL_LENGTH);
     alias nbufL is nbuf((SIGNAL_LENGTH - 1) downto 0);
+	 
+	 signal reversed_quotient, not_A, not_B: STD_LOGIC_VECTOR((SIGNAL_LENGTH - 1) downto 0);
+	 signal output_sign: std_logic;
+	 
 
 begin
 
@@ -96,38 +100,57 @@ calculating:process(reset, en, clk)
             end if;
         end if;
 end process calculating;
+
+not_A <= not(input_A) + 1;
+not_B <= not(input_B) + 1;
+
+with input_A(SIGNAL_LENGTH-1) select
+    num <= input_A when '0',
+	        not_A   when '1';
+			  
+with input_B(SIGNAL_LENGTH-1) select
+    den <= input_B when '0',
+	        not_B   when '1';
+
+--complement_input:process (op_ready)
+--	 begin
+--		if input_A(SIGNAL_LENGTH-1)='1' then
+--			num<= not (input_A-1);
+--		else
+--			num<=input_A;
+--		end if;
+--		if input_B(SIGNAL_LENGTH-1)='1' then
+--			den<= not (input_B-1);
+--		else
+--			den<=input_B;
+--		end if;
+--	end process complement_input;
 	 
-complement_input:process (op_ready)
-	 begin
-		if input_A(SIGNAL_LENGTH-1)='1' then
-			num<= not (input_A-1);
-		else
-			num<=input_A;
-		end if;
-		if input_B(SIGNAL_LENGTH-1)='1' then
-			den<= not (input_B-1);
-		else
-			den<=input_B;
-		end if;
-	end process complement_input;
+reversed_quotient <= not(quotient)+1;
+output_sign <= input_A(SIGNAL_LENGTH-1) xor input_B(SIGNAL_LENGTH-1);
+
+with output_sign select
+    output <= quotient WHEN '0',
+	           reversed_quotient WHEN '1',
+	 (others => '0') when OTHERS;
 	 
-complement_output:process (quotient)
-	begin
-		 if input_A(SIGNAL_LENGTH-1)='1' then
-			if input_B(SIGNAL_LENGTH-1)='1' then
-				output<=quotient;
-			else
-				output<=not(quotient)+1;
-			end if;
-		else
-			if input_B(SIGNAL_LENGTH-1)='0' then
-				output<=quotient;
-			else
-				output<=not(quotient)+1;
-			end if;
-		end if;
-		
-	end process complement_output;
+--complement_output:process (quotient)
+--	begin
+--		 if input_A(SIGNAL_LENGTH-1)='1' then
+--			if input_B(SIGNAL_LENGTH-1)='1' then
+--				output<=quotient;
+--			else
+--				output<=not(quotient)+1;
+--			end if;
+--		else
+--			if input_B(SIGNAL_LENGTH-1)='0' then
+--				output<=quotient;
+--			else
+--				output<=not(quotient)+1;
+--			end if;
+--		end if;
+--		
+--	end process complement_output;
 	
 end arch_division;
 

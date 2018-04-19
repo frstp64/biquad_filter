@@ -58,7 +58,7 @@ ARCHITECTURE behavior OF biquad_filter_v_tb IS
    signal temporary_overflow : std_logic;
 
    -- Clock period definitions
-   constant clk_period : time := 30 ns;
+   constant clk_period : time := 100000 ns;
  
 BEGIN
  
@@ -118,33 +118,9 @@ BEGIN
 		parameter_B2_mul<="00000111";
 		parameter_B2_div<="00000111";
 		input_signal<="00000001";
-		wait for clk_period*100;
+		wait for clk_period*1000;
 		parameter_A1_mul<="00000111";
 		parameter_A1_div<="00000111";
-		parameter_A2_mul<="00000111";
-		parameter_A2_div<="00000111";
-		parameter_B0_mul<="00000111";
-		parameter_B0_div<="00000001";
-		parameter_B1_mul<="00000111";
-		parameter_B1_div<="00000111";
-		parameter_B2_mul<="00000111";
-		parameter_B2_div<="00000111";
-		input_signal<="00000000";
-		wait for clk_period*100;
-		parameter_A1_mul<="00000111";
-		parameter_A1_div<="00000111";
-		parameter_A2_mul<="00000111";
-		parameter_A2_div<="00000111";
-		parameter_B0_mul<="00000111";
-		parameter_B0_div<="00000001";
-		parameter_B1_mul<="00000111";
-		parameter_B1_div<="00000111";
-		parameter_B2_mul<="00000111";
-		parameter_B2_div<="00000111";
-		input_signal<="00000000";
-		wait for clk_period*100;
-		parameter_A1_mul<="00000010";
-		parameter_A1_div<="00000001";
 		parameter_A2_mul<="00000111";
 		parameter_A2_div<="00000111";
 		parameter_B0_mul<="00000111";
@@ -155,8 +131,32 @@ BEGIN
 		parameter_B2_div<="00000111";
 		input_signal<="00000001";
 		wait for clk_period*100;
-		parameter_A1_mul<="00000010";
-		parameter_A1_div<="00000001";
+		parameter_A1_mul<="00000111";
+		parameter_A1_div<="00000111";
+		parameter_A2_mul<="00000111";
+		parameter_A2_div<="00000111";
+		parameter_B0_mul<="00000111";
+		parameter_B0_div<="00000001";
+		parameter_B1_mul<="00000111";
+		parameter_B1_div<="00000111";
+		parameter_B2_mul<="00000111";
+		parameter_B2_div<="00000111";
+		input_signal<="00000001";
+		wait for clk_period*100;
+		parameter_A1_mul<="00000111";
+		parameter_A1_div<="00000111";
+		parameter_A2_mul<="00000111";
+		parameter_A2_div<="00000111";
+		parameter_B0_mul<="00000111";
+		parameter_B0_div<="00000001";
+		parameter_B1_mul<="00000111";
+		parameter_B1_div<="00000111";
+		parameter_B2_mul<="00000111";
+		parameter_B2_div<="00000111";
+		input_signal<="00000001";
+		wait for clk_period*100;
+		parameter_A1_mul<="00000111";
+		parameter_A1_div<="00000111";
 		parameter_A2_mul<="00000111";
 		parameter_A2_div<="00000111";
 		parameter_B0_mul<="00000111";
