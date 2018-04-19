@@ -51,7 +51,7 @@ begin
 		elsif rising_edge(clk_in) then
 			if en='1' then
 				division_ring <= division_ring(division_factor*2-2 downto 0) & division_ring(division_factor*2-1);
-				clk_out <= division_ring(division_factor*2-1);
+				clk_out <= division_ring(1);
 			end if;
 		end if;
 	end process;
