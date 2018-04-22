@@ -38,18 +38,18 @@ END signed_divider_tb;
 ARCHITECTURE behavior OF signed_divider_tb IS 
  
     -- Component Declaration for the Unit Under Test (UUT)
-    constant SIGNAL_LENGTH_test : integer := 16;
+    constant SIGNAL_LENGTH_test : integer := 8;
 
     COMPONENT signed_divider
     generic ( SIGNAL_LENGTH: positive);
-    PORT(
-         input_A : IN  std_logic_vector(SIGNAL_LENGTH-1 downto 0);
-         input_B : IN  std_logic_vector(SIGNAL_LENGTH-1 downto 0);
-         clk : IN  std_logic;
-         reset : IN  std_logic;
-         en : IN  std_logic;
-         output : OUT  std_logic_vector(SIGNAL_LENGTH-1 downto 0)
-        );
+    Port (
+	   input_A : IN  std_logic_vector(SIGNAL_LENGTH-1 downto 0);
+		input_B : IN  std_logic_vector(SIGNAL_LENGTH-1 downto 0);
+		op_ready : IN std_logic;
+		clk : IN  std_logic;
+		reset : IN  std_logic;
+		en : IN  std_logic;
+		output : OUT  std_logic_vector(SIGNAL_LENGTH-1 downto 0));
     END COMPONENT;
     
 
@@ -59,15 +59,16 @@ ARCHITECTURE behavior OF signed_divider_tb IS
    signal clk : std_logic := '0';
    signal reset : std_logic := '0';
    signal en : std_logic := '0';
+	signal op_ready: std_logic := '0';
 
  	--Outputs
    signal output1_test : std_logic_vector(SIGNAL_LENGTH_test-1 downto 0);
 
    -- Clock period definitions
-   constant clk_period : time := 10 ns;
+   constant clk_period : time := 1000 ns;
    
 	for uut1 : signed_divider use entity
-            work.signed_divider(cheat_divider);
+            work.signed_divider(n_plus_2_clock_cycles);
 BEGIN
  
 	-- Instantiate the Unit Under Test (UUT)
@@ -79,49 +80,52 @@ BEGIN
           clk => clk,
           reset => reset,
           en => en,
-          output => output1_test
+          output => output1_test,
+			 op_ready => op_ready
         );
 
    -- Clock process definitions
    clk_process :process
+	begin
+		clk <= '0';
+		wait for clk_period/2;
+		clk <= '1';
+		wait for clk_period/2;
+   end process;
+ 
+
+   -- Stimulus process
+   stim_proc: process
    begin
+      reset <= '1';
       -- hold reset state for 100 ns.
       wait for 100 ns;	
-		reset <= '1';
-		en <= '1';
 
       wait for clk_period*10;
-
-      -- insert stimulus here 
+		reset <= '0';
 		en <= '1';
-		input_A_test <= std_logic_vector(to_signed(64, input_A_test'length));
-		input_B_test <= std_logic_vector(to_signed(64, input_B_test'length));
-		wait for 100 ns;
+
+		wait for clk_period;
+		input_A_test <= "01010101";
+		input_B_test <=  "00000001";
+		op_ready <= '1';
+		wait for clk_period;
+		op_ready <= '0';
+		wait for clk_period*(SIGNAL_LENGTH_test+2);
 		
-		input_A_test <= std_logic_vector(to_signed(-64, input_A_test'length));
-		input_B_test <= std_logic_vector(to_signed(64, input_B_test'length));
-		wait for 100 ns;
+		input_B_test <=  "00000010";
+		op_ready <= '1';
+		wait for clk_period;
+		op_ready <= '0';
+		wait for clk_period*(SIGNAL_LENGTH_test+2);
 		
-		input_A_test <= std_logic_vector(to_signed(128, input_A_test'length));
-		input_B_test <= std_logic_vector(to_signed(64, input_B_test'length));
-		wait for 100 ns;
-		
-		input_A_test <= std_logic_vector(to_signed(128, input_A_test'length));
-		input_B_test <= std_logic_vector(to_signed(-64, input_B_test'length));
-		wait for 100 ns;
-		
-		input_A_test <= std_logic_vector(to_signed(-64, input_A_test'length));
-		input_B_test <= std_logic_vector(to_signed(-64, input_B_test'length));
-		wait for 100 ns;
-		
-		input_A_test <= std_logic_vector(to_signed(0, input_A_test'length));
-		input_B_test <= std_logic_vector(to_signed(0, input_B_test'length));
-		wait for 100 ns;
-		
-		input_A_test <= std_logic_vector(to_signed(6, input_A_test'length));
-		input_B_test <= std_logic_vector(to_signed(13, input_B_test'length));
-		wait for 100 ns;
-		wait;
+		input_B_test <=  "11111011";
+		op_ready <= '1';
+		wait for clk_period;
+		op_ready <= '0';
+		wait for clk_period*(SIGNAL_LENGTH_test+2);
+
+      wait;
    end process;
 
 END;
