@@ -153,7 +153,7 @@ BEGIN
 		parameter_B1_div<="00000111";
 		parameter_B2_mul<="00000111";
 		parameter_B2_div<="00000111";
-		input_signal<="00000001";
+		input_signal<="00000000";
 		wait for clk_period*100;
 		parameter_A1_mul<="00000010";
 		parameter_A1_div<="00000001";
@@ -165,7 +165,7 @@ BEGIN
 		parameter_B1_div<="00000111";
 		parameter_B2_mul<="00000111";
 		parameter_B2_div<="00000111";
-		input_signal<="00000001";
+		input_signal<="00000000";
 		
 		
 		
