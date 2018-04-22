@@ -100,7 +100,7 @@ signal substraction_result_too_long: std_logic_vector(SIGNAL_LENGTH downto 0);
 
 signal readiness_propagation_vector: std_logic_vector(SIGNAL_LENGTH+1 downto 0);
 
-
+signal quotient_not_gated: std_logic_vector(SIGNAL_LENGTH-1 downto 0);
 begin
 
    input_container: shift_register
@@ -139,7 +139,7 @@ begin
           reset => reset,
           enable => enable,
           serial_out => OPEN,
-          parallel_out => quotient);
+          parallel_out => quotient_not_gated);
 			 
    inverter_for_substraction: signed_inverter
 	generic map (SIGNAL_LENGTH => SIGNAL_LENGTH+1)
@@ -194,6 +194,16 @@ begin
 		 end if;
 	end process;
 
+   process(clk, reset)
+	begin
+	    if (reset = '1') then
+		     quotient <= (others => '0');
+		 elsif (rising_edge(clk) and readiness_propagation_vector(SIGNAL_LENGTH+1) = '1') then
+		     quotient <= quotient_not_gated;
+		 end if;
+		 
+	end process;
+	
 output_ready <= readiness_propagation_vector(SIGNAL_LENGTH+1);
 
 end classic_shifter;
