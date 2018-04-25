@@ -43,27 +43,6 @@ entity signed_divider is
 	  );
 end signed_divider;
 
-architecture cheat_divider of signed_divider is
-
-signal signed_long_output: std_logic_vector(SIGNAL_LENGTH-1 downto 0);
-
-constant zeros : std_logic_vector(SIGNAL_LENGTH-1 downto 0) := (others => '0');
-
-begin
-
-process(input_A, input_B)
-begin
-    case input_B is
-	     when zeros => signed_long_output <= zeros;
-        when others => signed_long_output <= std_logic_vector(signed(input_A) / signed(input_B));
-    end case;
-end process;
-
-output <= signed_long_output(SIGNAL_LENGTH-1 downto 0);
-
-end cheat_divider;
-
-
 architecture n_plus_2_clock_cycles of signed_divider is
 
 component unsigned_divider

@@ -41,18 +41,6 @@ entity signed_multiplier is
 	  );
 end signed_multiplier;
 
-architecture cheat_multiplier of signed_multiplier is
-
-signal signed_long_output: std_logic_vector(SIGNAL_LENGTH*2-1 downto 0);
-
-begin
-
-signed_long_output <= std_logic_vector(signed(input_A) * signed(input_B));
-
-output <= signed_long_output(SIGNAL_LENGTH-1 downto 0);
-
-end cheat_multiplier;
-
 architecture wallace_tree of signed_multiplier is
 
 component unsigned_multiplier

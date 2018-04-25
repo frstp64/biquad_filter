@@ -174,42 +174,6 @@ signal results_a1_a2_inv : STD_LOGIC_VECTOR(INTERNAL_VARIABLE_LENGTH-1 downto 0)
 
 signal op_ready_global: std_logic;
 
---for input_times_b0_mul_component : signed_multiplier use entity
---			work.signed_multiplier(wallace_tree);
---
---for input_p1_times_b1_mul_component : signed_multiplier use entity
---			work.signed_multiplier(wallace_tree);
---			
---for input_p2_times_b2_mul_component : signed_multiplier use entity
---			work.signed_multiplier(wallace_tree);
---
---for output_p1_times_a1_mul_component : signed_multiplier use entity
---			work.signed_multiplier(wallace_tree);
---
---for output_p2_times_a2_mul_component : signed_multiplier use entity
---			work.signed_multiplier(wallace_tree);
---
---for input_times_b0_div_component : signed_divider use entity
---         work.signed_divider(n_plus_2_clock_cycles);
---         --work.signed_divider(cheat_divider);
---
---for input_p1_times_b1_div_component : signed_divider use entity
---         work.signed_divider(n_plus_2_clock_cycles);
---         --work.signed_divider(cheat_divider);
---
---for input_p2_times_b2_div_component : signed_divider use entity
---         work.signed_divider(n_plus_2_clock_cycles);
---         --work.signed_divider(cheat_divider);
---
---for output_p1_times_a1_div_component : signed_divider use entity
---         work.signed_divider(n_plus_2_clock_cycles);
---         --work.signed_divider(cheat_divider);
---
---for output_p2_times_a2_div_component : signed_divider use entity
---         work.signed_divider(n_plus_2_clock_cycles);
---         --work.signed_divider(cheat_divider);
-
-
 begin
 
 -- resize all the vectors here
