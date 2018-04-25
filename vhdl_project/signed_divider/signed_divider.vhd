@@ -38,6 +38,7 @@ entity signed_divider is
 		clk : IN  std_logic;
 		reset : IN  std_logic;
 		en : IN  std_logic;
+		two_sign_delays : IN std_logic;
 		output : OUT  std_logic_vector(SIGNAL_LENGTH-1 downto 0)
 	  );
 end signed_divider;
@@ -93,6 +94,7 @@ signal unsigned_output: STD_LOGIC_VECTOR(SIGNAL_LENGTH-1 downto 0);
 signal unsigned_output_inverted: STD_LOGIC_VECTOR(SIGNAL_LENGTH-1 downto 0);
 signal output_sign: std_logic;
 signal output_sign_gated: std_logic;
+signal output_sign_gated_prev: std_logic;
 signal op_ready_signal: std_logic;
 signal output_ready_signal: std_logic;
 
@@ -141,8 +143,13 @@ output_sign <= input_A(SIGNAL_LENGTH-1) xor input_B(SIGNAL_LENGTH-1);
 process(clk, reset, en, output_ready_signal)
 begin
     if (reset = '1') then
+	     output_sign_gated_prev <= '0';
 	     output_sign_gated <= '0';
-	 elsif (rising_edge(clk) and en = '1' and output_ready_signal = '1') then
+	 elsif (rising_edge(clk) and en = '1' and output_ready_signal = '1' and two_sign_delays = '1') then
+	     output_sign_gated_prev <= output_sign;
+	     output_sign_gated <= output_sign_gated_prev;
+	 elsif (rising_edge(clk) and en = '1' and output_ready_signal = '1' and two_sign_delays = '0') then
+	     output_sign_gated_prev <= output_sign;
 	     output_sign_gated <= output_sign;
 	 end if;
 	 

@@ -53,7 +53,7 @@ end biquad_filter;
 architecture flow_arch of biquad_filter is
 
 constant INTERNAL_VARIABLE_LENGTH: integer := 2*SIGNAL_LENGTH     +2; -- to verify
-constant CLOCK_DIVISION_VALUE: integer := INTERNAL_VARIABLE_LENGTH + 3;
+constant CLOCK_DIVISION_VALUE: integer := INTERNAL_VARIABLE_LENGTH + 4;
 
 COMPONENT signed_expander
 generic ( IN_LENGTH: positive;
@@ -93,6 +93,7 @@ END COMPONENT;
 		clk : IN  std_logic;
 		reset : IN  std_logic;
 		en : IN  std_logic;
+		two_sign_delays : IN std_logic;
 		output : OUT  std_logic_vector(SIGNAL_LENGTH-1 downto 0)
 	  );
 END COMPONENT;
@@ -148,6 +149,7 @@ signal  input_expanded : STD_LOGIC_VECTOR(INTERNAL_VARIABLE_LENGTH-1 downto 0);
 signal output_expanded : STD_LOGIC_VECTOR(INTERNAL_VARIABLE_LENGTH-1 downto 0);
 
 -- registers outputs
+signal input_previous_0 : STD_LOGIC_VECTOR(INTERNAL_VARIABLE_LENGTH-1 downto 0);
 signal input_previous_1 : STD_LOGIC_VECTOR(INTERNAL_VARIABLE_LENGTH-1 downto 0);
 signal input_previous_2 : STD_LOGIC_VECTOR(INTERNAL_VARIABLE_LENGTH-1 downto 0);
 signal output_previous_1 : STD_LOGIC_VECTOR(INTERNAL_VARIABLE_LENGTH-1 downto 0);
@@ -172,40 +174,40 @@ signal results_a1_a2_inv : STD_LOGIC_VECTOR(INTERNAL_VARIABLE_LENGTH-1 downto 0)
 
 signal op_ready_global: std_logic;
 
-for input_times_b0_mul_component : signed_multiplier use entity
-			work.signed_multiplier(wallace_tree);
-
-for input_p1_times_b1_mul_component : signed_multiplier use entity
-			work.signed_multiplier(wallace_tree);
-			
-for input_p2_times_b2_mul_component : signed_multiplier use entity
-			work.signed_multiplier(wallace_tree);
-
-for output_p1_times_a1_mul_component : signed_multiplier use entity
-			work.signed_multiplier(wallace_tree);
-
-for output_p2_times_a2_mul_component : signed_multiplier use entity
-			work.signed_multiplier(wallace_tree);
-
-for input_times_b0_div_component : signed_divider use entity
-         work.signed_divider(n_plus_2_clock_cycles);
-         --work.signed_divider(cheat_divider);
-
-for input_p1_times_b1_div_component : signed_divider use entity
-         work.signed_divider(n_plus_2_clock_cycles);
-         --work.signed_divider(cheat_divider);
-
-for input_p2_times_b2_div_component : signed_divider use entity
-         work.signed_divider(n_plus_2_clock_cycles);
-         --work.signed_divider(cheat_divider);
-
-for output_p1_times_a1_div_component : signed_divider use entity
-         work.signed_divider(n_plus_2_clock_cycles);
-         --work.signed_divider(cheat_divider);
-
-for output_p2_times_a2_div_component : signed_divider use entity
-         work.signed_divider(n_plus_2_clock_cycles);
-         --work.signed_divider(cheat_divider);
+--for input_times_b0_mul_component : signed_multiplier use entity
+--			work.signed_multiplier(wallace_tree);
+--
+--for input_p1_times_b1_mul_component : signed_multiplier use entity
+--			work.signed_multiplier(wallace_tree);
+--			
+--for input_p2_times_b2_mul_component : signed_multiplier use entity
+--			work.signed_multiplier(wallace_tree);
+--
+--for output_p1_times_a1_mul_component : signed_multiplier use entity
+--			work.signed_multiplier(wallace_tree);
+--
+--for output_p2_times_a2_mul_component : signed_multiplier use entity
+--			work.signed_multiplier(wallace_tree);
+--
+--for input_times_b0_div_component : signed_divider use entity
+--         work.signed_divider(n_plus_2_clock_cycles);
+--         --work.signed_divider(cheat_divider);
+--
+--for input_p1_times_b1_div_component : signed_divider use entity
+--         work.signed_divider(n_plus_2_clock_cycles);
+--         --work.signed_divider(cheat_divider);
+--
+--for input_p2_times_b2_div_component : signed_divider use entity
+--         work.signed_divider(n_plus_2_clock_cycles);
+--         --work.signed_divider(cheat_divider);
+--
+--for output_p1_times_a1_div_component : signed_divider use entity
+--         work.signed_divider(n_plus_2_clock_cycles);
+--         --work.signed_divider(cheat_divider);
+--
+--for output_p2_times_a2_div_component : signed_divider use entity
+--         work.signed_divider(n_plus_2_clock_cycles);
+--         --work.signed_divider(cheat_divider);
 
 
 begin
@@ -300,13 +302,24 @@ PORT MAP (
 
 -- previous values registers TODO
 
-input_prev_1_register: nbitregister
+input_prev_0_register: nbitregister
        GENERIC MAP(SIGNAL_LENGTH => INTERNAL_VARIABLE_LENGTH)
 		 PORT MAP (
 		 pre_op => op_ready_global,
 		 clk => clk,
 		 rst => reset,
 		 op_a => input_expanded,
+		 q => input_previous_0,
+		 qb => open
+	  );
+
+input_prev_1_register: nbitregister
+       GENERIC MAP(SIGNAL_LENGTH => INTERNAL_VARIABLE_LENGTH)
+		 PORT MAP (
+		 pre_op => op_ready_global,
+		 clk => clk,
+		 rst => reset,
+		 op_a => input_previous_0,
 		 q => input_previous_1,
 		 qb => open
 	  );
@@ -322,36 +335,36 @@ input_prev_2_register: nbitregister
 		 qb => open
 	  );
 
-output_prev_1_register: nbitregister
-       GENERIC MAP(SIGNAL_LENGTH => INTERNAL_VARIABLE_LENGTH)
-       PORT MAP (
-		 pre_op => op_ready_global,
-		 clk => clk,
-		 rst => reset,
-		 op_a => output_expanded,
-		 q => output_previous_2, -- fix
-		 qb => open
-	  );
-
 output_previous_1 <= output_expanded;
 
---output_prev_2_register: nbitregister
+--output_prev_1_register: nbitregister
 --       GENERIC MAP(SIGNAL_LENGTH => INTERNAL_VARIABLE_LENGTH)
---		 PORT MAP (
+--       PORT MAP (
 --		 pre_op => op_ready_global,
 --		 clk => clk,
 --		 rst => reset,
---		 op_a => output_previous_1,
---		 q => output_previous_2,
+--		 op_a => output_expanded,
+--		 q => output_previous_1,
 --		 qb => open
 --	  );
+
+output_prev_2_register: nbitregister
+       GENERIC MAP(SIGNAL_LENGTH => INTERNAL_VARIABLE_LENGTH)
+		 PORT MAP (
+		 pre_op => op_ready_global,
+		 clk => clk,
+		 rst => reset,
+		 op_a => output_previous_1,
+		 q => output_previous_2,
+		 qb => open
+	  );
 
 ---- computation of multiplication/division of input/output values
 -- multiplicators
 input_times_b0_mul_component: signed_multiplier
 generic map( SIGNAL_LENGTH => INTERNAL_VARIABLE_LENGTH)
 PORT map(
-		input_A => input_expanded,
+		input_A => input_previous_0,
 		input_B => B0_mul_expanded,
 		clk => clk,
 		reset => reset,
@@ -415,6 +428,7 @@ PORT map(
 		clk => clk,
 		reset => reset,
 		en => en,
+		two_sign_delays => '1',
 		output => input_times_b0
 	  );
 
@@ -427,6 +441,7 @@ PORT map(
 		clk => clk,
 		reset => reset,
 		en => en,
+		two_sign_delays => '1',
 		output => input_p1_times_b1
 	  );
 	  
@@ -439,6 +454,7 @@ PORT map(
 		clk => clk,
 		reset => reset,
 		en => en,
+		two_sign_delays => '1',
 		output => input_p2_times_b2
 	  );
 	  
@@ -451,6 +467,7 @@ PORT map(
 		clk => clk,
 		reset => reset,
 		en => en,
+		two_sign_delays => '0',
 		output => output_p1_times_a1
 	  );
 	  
@@ -463,6 +480,7 @@ PORT map(
 		clk => clk,
 		reset => reset,
 		en => en,
+		two_sign_delays => '1',
 		output => output_p2_times_a2
 	  );
 

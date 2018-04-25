@@ -101,3 +101,4 @@ fuse.xmsgs
 *.exe
 *.ini
 vhdl_project/isim
+vhdl_project/netgen
